@@ -203,6 +203,7 @@ const AddProduct = () => {
         });
 
         const uploadResult = await uploadResponse.json();
+        console.log('Upload response:', uploadResult);
 
         if (!uploadResult.success) {
           setError(uploadResult.message || 'Failed to upload images');
@@ -211,7 +212,15 @@ const AddProduct = () => {
         }
 
         // Extract image URLs from upload response
-        imageUrls = uploadResult.data.images.map(img => img.url);
+        if (uploadResult.data && uploadResult.data.images && Array.isArray(uploadResult.data.images)) {
+          imageUrls = uploadResult.data.images.map(img => img.url);
+          console.log('Extracted image URLs:', imageUrls);
+        } else {
+          console.warn('Unexpected upload response structure:', uploadResult);
+          setError('Upload response format unexpected');
+          setLoading(false);
+          return;
+        }
       }
 
       // Step 2: Create product with image URLs
@@ -237,7 +246,9 @@ const AddProduct = () => {
         submitData.weight = formData.weight;
       }
 
-      const response = await fetch('http://localhost:5000/api/v1/products', {
+      console.log('Submitting product data:', submitData); // Log for debugging
+
+      const response = await fetch('http://localhost:5000/api/v1/admin/products', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -254,9 +265,16 @@ const AddProduct = () => {
           navigate('/admin/products');
         }, 1500);
       } else {
-        setError(result.message || 'Failed to create product');
+        // Show detailed error messages
+        let errorMessage = result.message || 'Failed to create product';
+        if (result.errors && Array.isArray(result.errors)) {
+          errorMessage = result.errors.join(', ');
+        }
+        console.log('API Response:', result); // Log for debugging
+        setError(errorMessage);
       }
     } catch (err) {
+      console.error('Submission error:', err); // Log for debugging
       setError('Error creating product: ' + err.message);
     } finally {
       setLoading(false);

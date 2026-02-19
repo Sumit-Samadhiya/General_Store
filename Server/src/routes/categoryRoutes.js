@@ -3,7 +3,8 @@ const router = express.Router();
 const Joi = require('joi');
 const Category = require('../models/Category.js');
 const Product = require('../models/Product.js');
-const { verifyToken, verifyAdmin } = require('../middleware/auth.js');
+const verifyToken = require('../middleware/auth.js');
+const authorize = require('../middleware/rbac.js');
 
 // Validation schema
 const categorySchema = {
@@ -24,7 +25,7 @@ const categorySchema = {
  * @desc    Get all categories (Admin)
  * @access  Private/Admin
  */
-router.get('/', verifyToken, verifyAdmin, async (req, res) => {
+router.get('/', verifyToken, authorize('admin'), async (req, res) => {
   try {
     const categories = await Category.find({}).sort({ createdAt: -1 });
 
@@ -55,11 +56,33 @@ router.get('/', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 /**
+ * @route   GET /api/v1/categories/public/all
+ * @desc    Get all active categories (Public)
+ * @access  Public
+ */
+router.get('/public/all', async (req, res) => {
+  try {
+    const categories = await Category.find({ isActive: true }).sort({ name: 1 });
+
+    res.status(200).json({
+      success: true,
+      data: categories
+    });
+  } catch (error) {
+    console.error('Get public categories error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching categories: ' + error.message
+    });
+  }
+});
+
+/**
  * @route   POST /api/v1/categories
  * @desc    Create new category (Admin)
  * @access  Private/Admin
  */
-router.post('/', verifyToken, verifyAdmin, async (req, res) => {
+router.post('/', verifyToken, authorize('admin'), async (req, res) => {
   try {
     // Validate request body
     const { value, error } = categorySchema.create.validate(req.body);
@@ -106,7 +129,7 @@ router.post('/', verifyToken, verifyAdmin, async (req, res) => {
  * @desc    Get single category by ID (Admin)
  * @access  Private/Admin
  */
-router.get('/:id', verifyToken, verifyAdmin, async (req, res) => {
+router.get('/:id', verifyToken, authorize('admin'), async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
 
@@ -144,7 +167,7 @@ router.get('/:id', verifyToken, verifyAdmin, async (req, res) => {
  * @desc    Update category (Admin)
  * @access  Private/Admin
  */
-router.put('/:id', verifyToken, verifyAdmin, async (req, res) => {
+router.put('/:id', verifyToken, authorize('admin'), async (req, res) => {
   try {
     // Validate request body
     const { value, error } = categorySchema.update.validate(req.body);
@@ -213,7 +236,7 @@ router.put('/:id', verifyToken, verifyAdmin, async (req, res) => {
  * @desc    Delete category (Admin)
  * @access  Private/Admin
  */
-router.delete('/:id', verifyToken, verifyAdmin, async (req, res) => {
+router.delete('/:id', verifyToken, authorize('admin'), async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
 
@@ -245,28 +268,6 @@ router.delete('/:id', verifyToken, verifyAdmin, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error deleting category: ' + error.message
-    });
-  }
-});
-
-/**
- * @route   GET /api/v1/categories/public/all
- * @desc    Get all active categories (Public)
- * @access  Public
- */
-router.get('/public/all', async (req, res) => {
-  try {
-    const categories = await Category.find({ isActive: true }).sort({ name: 1 });
-
-    res.status(200).json({
-      success: true,
-      data: categories
-    });
-  } catch (error) {
-    console.error('Get public categories error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching categories: ' + error.message
     });
   }
 });

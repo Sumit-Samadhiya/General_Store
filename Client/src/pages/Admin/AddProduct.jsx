@@ -185,39 +185,65 @@ const AddProduct = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      
-      // Create FormData for file upload
-      const submitData = new FormData();
-      submitData.append('name', formData.name);
-      submitData.append('brand', formData.brand);
-      submitData.append('description', formData.description);
-      submitData.append('category', formData.category);
-      submitData.append('price', formData.price);
-      
+      let imageUrls = [];
+
+      // Step 1: Upload images if any exist
+      if (imagePreviews.length > 0) {
+        const imageFormData = new FormData();
+        imagePreviews.forEach(img => {
+          imageFormData.append('images', img.file);
+        });
+
+        const uploadResponse = await fetch('http://localhost:5000/api/upload/batch', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: imageFormData
+        });
+
+        const uploadResult = await uploadResponse.json();
+
+        if (!uploadResult.success) {
+          setError(uploadResult.message || 'Failed to upload images');
+          setLoading(false);
+          return;
+        }
+
+        // Extract image URLs from upload response
+        imageUrls = uploadResult.data.images.map(img => img.url);
+      }
+
+      // Step 2: Create product with image URLs
+      const submitData = {
+        name: formData.name,
+        brand: formData.brand,
+        description: formData.description,
+        category: formData.category,
+        price: parseFloat(formData.price),
+        shopId: '6996fc58e496cc042fedfa92', // Default shop ID from seed
+        isAvailable: formData.isAvailable,
+        images: imageUrls
+      };
+
+      // Add optional fields
       if (formData.discountedPrice) {
-        submitData.append('discountedPrice', formData.discountedPrice);
+        submitData.discountedPrice = parseFloat(formData.discountedPrice);
       }
 
       if (formData.category === 'household') {
-        submitData.append('size', formData.size);
+        submitData.size = formData.size;
       } else {
-        submitData.append('weight', formData.weight);
+        submitData.weight = formData.weight;
       }
-
-      submitData.append('isAvailable', formData.isAvailable);
-      submitData.append('shopId', '6996fc58e496cc042fedfa92'); // Default shop ID from seed
-
-      // Add images
-      imagePreviews.forEach(img => {
-        submitData.append('images', img.file);
-      });
 
       const response = await fetch('http://localhost:5000/api/v1/products', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
-        body: submitData
+        body: JSON.stringify(submitData)
       });
 
       const result = await response.json();

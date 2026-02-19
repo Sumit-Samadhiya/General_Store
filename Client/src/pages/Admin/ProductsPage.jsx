@@ -244,7 +244,13 @@ const ProductsPage = () => {
                     <td>
                       <div className={styles.actions}>
                         <button className={styles.btnView} title="View">👁️</button>
-                        <button className={styles.btnEdit} title="Edit">✏️</button>
+                        <button 
+                          className={styles.btnEdit} 
+                          title="Edit"
+                          onClick={() => navigate(`/admin/products/edit/${product._id}`)}
+                        >
+                          ✏️
+                        </button>
                         <button
                           className={styles.btnDelete}
                           title="Delete"

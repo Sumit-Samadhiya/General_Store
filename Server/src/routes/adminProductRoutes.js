@@ -24,7 +24,7 @@ const createProductSchema = Joi.object({
     .when('category', { is: 'household', then: Joi.required(), otherwise: Joi.forbidden() }),
   price: Joi.number().min(0.01).required(),
   discountedPrice: Joi.number().min(0).less(Joi.ref('price')).optional(),
-  images: Joi.array().items(Joi.string().uri()).optional(),
+  images: Joi.array().items(Joi.string()).optional(),
   shopId: Joi.string().required(),
   isAvailable: Joi.boolean().optional()
 });

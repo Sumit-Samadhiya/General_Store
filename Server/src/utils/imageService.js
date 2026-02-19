@@ -42,7 +42,8 @@ const uploadLocalImage = async (file, folder = 'products') => {
   // File is already saved by multer
   const filename = file.filename;
   const relativePath = `uploads/${folder}/${filename}`;
-  const publicUrl = `${process.env.API_BASE_URL || 'http://localhost:5000/api/v1'}/images/${folder}/${filename}`;
+  // Use /images path that matches the static file serving in server.js
+  const publicUrl = `${process.env.API_BASE_URL || 'http://localhost:5000'}/images/${folder}/${filename}`;
 
   return {
     filename,

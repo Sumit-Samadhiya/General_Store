@@ -50,7 +50,13 @@ categorySchema.virtual('productCount', {
   count: true
 });
 
-// Ensure virtuals are included in JSON output
-categorySchema.set('toJSON', { virtuals: true });
+// Ensure virtuals and slug are included in JSON output
+categorySchema.set('toJSON', { 
+  virtuals: true,
+  transform: function(doc, ret) {
+    ret.slug = doc.slug;
+    return ret;
+  }
+});
 
 module.exports = mongoose.model('Category', categorySchema);

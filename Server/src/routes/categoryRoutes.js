@@ -29,11 +29,11 @@ router.get('/', verifyToken, authorize('admin'), async (req, res) => {
   try {
     const categories = await Category.find({}).sort({ createdAt: -1 });
 
-    // Get product count for each category
+    // Get product count for each category by name
     const categoriesWithCount = await Promise.all(
       categories.map(async (cat) => {
         const productCount = await Product.countDocuments({
-          category: cat._id
+          category: cat.slug || cat.name.toLowerCase()
         });
         return {
           ...cat.toJSON(),
@@ -141,7 +141,7 @@ router.get('/:id', verifyToken, authorize('admin'), async (req, res) => {
     }
 
     const productCount = await Product.countDocuments({
-      category: category._id
+      category: category.slug || category.name.toLowerCase()
     });
 
     const categoryData = {
@@ -209,7 +209,7 @@ router.put('/:id', verifyToken, authorize('admin'), async (req, res) => {
     await category.save();
 
     const productCount = await Product.countDocuments({
-      category: category._id
+      category: category.slug || category.name.toLowerCase()
     });
 
     const updatedCategory = {
@@ -247,9 +247,9 @@ router.delete('/:id', verifyToken, authorize('admin'), async (req, res) => {
       });
     }
 
-    // Get product count before deletion
+    // Get product count before deletion using category slug/name
     const productCount = await Product.countDocuments({
-      category: category._id
+      category: category.slug || category.name.toLowerCase()
     });
 
     // Delete category

@@ -148,35 +148,13 @@ const CategoriesManagement = () => {
 
   // Open delete modal
   const openDeleteModal = async (category) => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(
-        `http://localhost:5000/api/v1/products?category=${category._id}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
-      const result = await response.json();
-      const productCount = result.data ? result.data.length : 0;
-
-      setDeleteModal({
-        isOpen: true,
-        categoryId: category._id,
-        categoryName: category.name,
-        productCount
-      });
-    } catch (err) {
-      console.error('Error fetching product count:', err);
-      setDeleteModal({
-        isOpen: true,
-        categoryId: category._id,
-        categoryName: category.name,
-        productCount: 0
-      });
-    }
+    // Use the product count from the category data returned by the API
+    setDeleteModal({
+      isOpen: true,
+      categoryId: category._id,
+      categoryName: category.name,
+      productCount: category.productCount || 0
+    });
   };
 
   // Confirm delete

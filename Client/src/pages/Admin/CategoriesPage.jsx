@@ -1,12 +1,7 @@
-import styles from './AdminPages.module.css';
+import CategoriesManagement from './CategoriesManagement.jsx';
 
 const CategoriesPage = () => {
-  return (
-    <div className={styles.page}>
-      <h1>Categories</h1>
-      <p>Review and manage category definitions and visibility.</p>
-    </div>
-  );
+  return <CategoriesManagement />;
 };
 
 export default CategoriesPage;

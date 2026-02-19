@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const adminProductRoutes = require('./routes/adminProductRoutes');
 const customerProductRoutes = require('./routes/customerProductRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const { errorHandler, notFoundHandler, asyncHandler } = require('./middleware/errorHandler');
@@ -143,6 +144,9 @@ app.use(`/api/${apiVersion}/auth`, authLimiter, authRoutes);
 app.use(`/api/products`, customerProductRoutes);
 app.use(`/api/${apiVersion}/products`, productRoutes);
 app.use(`/api/${apiVersion}/admin/products`, adminProductRoutes);
+
+// Category routes
+app.use(`/api/${apiVersion}/categories`, categoryRoutes);
 
 // Cart routes
 app.use(`/api/cart`, cartRoutes);

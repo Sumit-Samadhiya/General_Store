@@ -3,8 +3,6 @@ import AdminLayout from './components/Admin/AdminLayout.jsx';
 import AdminRoute from './components/Admin/AdminRoute.jsx';
 import DashboardPage from './pages/Admin/DashboardPage.jsx';
 import ProductsPage from './pages/Admin/ProductsPage.jsx';
-import AddProduct from './pages/Admin/AddProduct.jsx';
-import EditProduct from './pages/Admin/EditProduct.jsx';
 import CategoriesPage from './pages/Admin/CategoriesPage.jsx';
 import OrdersPage from './pages/Admin/OrdersPage.jsx';
 import SettingsPage from './pages/Admin/SettingsPage.jsx';
@@ -34,8 +32,6 @@ const App = () => {
       >
         <Route index element={<DashboardPage />} />
         <Route path="products" element={<ProductsPage />} />
-        <Route path="products/add" element={<AddProduct />} />
-        <Route path="products/edit/:productId" element={<EditProduct />} />
         <Route path="categories" element={<CategoriesPage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="settings" element={<SettingsPage />} />

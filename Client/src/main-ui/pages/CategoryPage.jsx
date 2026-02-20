@@ -1,73 +1,62 @@
-import { Alert, Box, CircularProgress, Container, Grid, Typography } from '@mui/material';
+import { Link, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import MainHeader from '../components/Header/MainHeader.jsx';
-import ProductCard from '../components/Product/ProductCard.jsx';
-import { CATEGORY_ORDER, fetchProductsByCategory } from '../services/productsApi.js';
-
-const categoryLabel = (value) => value.charAt(0).toUpperCase() + value.slice(1);
+import MainHeader from '../components/Header/MainHeader';
+import { getProductsByCategory } from '../services/productsApi';
 
 const CategoryPage = () => {
   const { category } = useParams();
-  const selectedCategory = String(category || '').toLowerCase();
   const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const run = async () => {
-      if (!CATEGORY_ORDER.includes(selectedCategory)) {
-        setError('Invalid category.');
-        setIsLoading(false);
-        return;
-      }
+    let cancelled = false;
+    getProductsByCategory(category || '')
+      .then((data) => { if (!cancelled) setProducts(Array.isArray(data) ? data : []); })
+      .catch(() => { if (!cancelled) setProducts([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [category]);
 
-      try {
-        setError('');
-        setIsLoading(true);
-        const data = await fetchProductsByCategory(selectedCategory);
-        setProducts(data);
-      } catch (apiError) {
-        setError('Category products load nahi ho pa rahe.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    run();
-  }, [selectedCategory]);
+  const title = category ? `${category.charAt(0).toUpperCase() + category.slice(1)}` : 'Category';
 
   return (
-    <Box sx={{ pb: { xs: 4, md: 6 } }}>
+    <div className="min-h-screen bg-stone-50">
       <MainHeader />
-
-      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, textTransform: 'capitalize', mb: 0.7 }}>
-          {categoryLabel(selectedCategory)} Products
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2.2 }}>
-          Total items: {products.length}
-        </Typography>
-
-        {isLoading ? (
-          <Box sx={{ py: 7, display: 'grid', placeItems: 'center' }}>
-            <CircularProgress color="success" />
-          </Box>
-        ) : null}
-
-        {!isLoading && error ? <Alert severity="error">{error}</Alert> : null}
-
-        {!isLoading && !error ? (
-          <Grid container spacing={{ xs: 2, sm: 3 }}>
-            {products.map((product) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={product._id || product.name}>
-                <ProductCard product={product} fluid />
-              </Grid>
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <Link to="/" className="text-sm text-stone-500 hover:text-stone-900">← Home</Link>
+        <h1 className="mt-4 font-display text-3xl font-bold text-stone-900">{title}</h1>
+        {loading ? (
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => <div key={i} className="h-64 animate-pulse rounded-2xl bg-stone-200" />)}
+          </div>
+        ) : products.length > 0 ? (
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {products.map((p) => (
+              <Link
+                key={p._id}
+                to="/"
+                className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm hover:shadow-md"
+              >
+                <div className="aspect-square bg-stone-100">
+                  <img
+                    src={p.images?.[0] || 'https://placehold.co/400x400/f5f5f4/78716c?text=No+Image'}
+                    alt={p.name}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold text-stone-800 line-clamp-2">{p.name}</h3>
+                  <p className="mt-1 text-sm text-stone-500">{p.brand}</p>
+                  <p className="mt-2 font-bold text-stone-900">₹{p.discountedPrice ?? p.price}</p>
+                </div>
+              </Link>
             ))}
-          </Grid>
-        ) : null}
-      </Container>
-    </Box>
+          </div>
+        ) : (
+          <p className="mt-8 text-stone-500">No products in this category.</p>
+        )}
+      </main>
+    </div>
   );
 };
 

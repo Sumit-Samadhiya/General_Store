@@ -1,8 +1,8 @@
 .layout {
   display: flex;
   min-height: 100vh;
-  background: #0F172A;
-  color: #E2E8F0;
+  background: #f5f7fb;
+  color: #1f2a37;
   font-family: "Poppins", "Segoe UI", sans-serif;
 }
 
